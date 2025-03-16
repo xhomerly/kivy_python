@@ -1,0 +1,40 @@
+<TodoList>:
+    orientation: 'vertical'
+    task_input: task_input
+    task_list: task_list
+
+    TextInput:
+        id: task_input
+        hint_text: 'Zadej úkol'
+        size_hint_y: None
+        height: 40
+
+    Button:
+        text: 'Přidat úkol'
+        size_hint_y: None
+        height: 40
+        on_press: root.add_task()
+
+    ScrollView:
+        BoxLayout:
+            id: task_list
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+
+<TaskItem>:
+    size_hint_y: None
+    height: 40
+
+    Button:
+        text: root.text
+        on_press: root.parent_list.toggle_complete(root.text)
+
+    ToggleButton:
+        text: 'urgent'
+        state: 'down' if root.urgent else 'normal'
+        on_press: root.parent_list.toggle_urgent(root.text)
+
+    Button:
+        text: 'delete'
+        on_press: root.parent_list.remove_task(root.text)
