@@ -33,59 +33,46 @@ class ToDoList(BoxLayout):
     def add_task(self):
         task_text = self.task_input.text.strip()
         if task_text:
-            new_task = {
-                "text": task_text,
-                "completed": False,
-                "urgent": False,
-                "order": len(self.tasks)  # Pořadí podle aktuální délky seznamu
-            }
-            self.tasks.append(new_task)
+            self.tasks.append({"text": task_text, "completed": False, "urgent": False})
             self.task_input.text = ''
             self.save_tasks()
             self.refresh_task_list()
 
-    def move_task(self, task_text, direction):
-        """ Přesune úkol nahoru nebo dolů podle direction ('up' nebo 'down') """
-        index = next((i for i, task in enumerate(self.tasks) if task["text"] == task_text), None)
-        if index is not None:
-            if direction == "up" and index > 0:
-                self.tasks[index], self.tasks[index - 1] = self.tasks[index - 1], self.tasks[index]
-            elif direction == "down" and index < len(self.tasks) - 1:
-                self.tasks[index], self.tasks[index + 1] = self.tasks[index + 1], self.tasks[index]
+    def toggle_complete(self, task_text):
+        for task in self.tasks:
+            if task["text"] == task_text:
+                task["completed"] = not task["completed"]
+                break
+        self.save_tasks()
+        self.refresh_task_list()
 
-            # Aktualizujeme "order" podle nové pozice
-            for i, task in enumerate(self.tasks):
-                task["order"] = i
+    def toggle_urgent(self, task_text):
+        for task in self.tasks:
+            if task["text"] == task_text:
+                task["urgent"] = not task["urgent"]
+                break
+        self.save_tasks()
+        self.refresh_task_list()
 
-            self.save_tasks()
-            self.refresh_task_list()
+    def remove_task(self, task_text):
+        self.tasks = [task for task in self.tasks if task["text"] != task_text]
+        self.save_tasks()
+        self.refresh_task_list()
 
     def save_tasks(self):
-        """ Uloží úkoly se správným pořadím """
-        data = {
-            "count": len(self.tasks),
-            "tasks": sorted(self.tasks, key=lambda x: x["order"])  # Seřadíme podle pořadí
-        }
         with open("tasks.json", "w") as f:
-            json.dump(data, f, indent=4)
+            json.dump(self.tasks, f)
 
     def load_tasks(self):
-        """ Načte úkoly a seřadí je podle pořadí """
         if os.path.exists("tasks.json"):
             with open("tasks.json", "r") as f:
-                data = json.load(f)
-                self.tasks = sorted(data.get("tasks", []), key=lambda x: x.get("order", 0))  # Zajistíme správné pořadí
+                self.tasks = json.load(f)
 
     def refresh_task_list(self):
-        """ Obnoví seznam úkolů v UI """
         self.task_list.clear_widgets()
-        for task in sorted(self.tasks, key=lambda x: x["order"]):  # Seřadíme podle pořadí
-            task_item = TaskItem(
-                text=task["text"],
-                completed=task["completed"],
-                urgent=task["urgent"],
-                parent_list=self
-            )
+        for task in self.tasks:
+            task_item = TaskItem(text=task["text"], completed=task["completed"], urgent=task["urgent"],
+                                 parent_list=self)
             self.task_list.add_widget(task_item)
 
 
