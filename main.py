@@ -1,85 +1,81 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
-
 import json
 import os
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.properties import StringProperty, BooleanProperty
+from kivy.uix.boxlayout import BoxLayout
 
+TASKS_FILE = "tasks.json"
+
+def load_tasks():
+    if os.path.exists(TASKS_FILE):
+        with open(TASKS_FILE, "r") as f:
+            return json.load(f)
+    return []
+
+def save_tasks(tasks):
+    with open(TASKS_FILE, "w") as f:
+        json.dump(tasks, f, indent=4)
 
 class TaskItem(BoxLayout):
-    text = StringProperty()
-    completed = BooleanProperty(False)
-    urgent = BooleanProperty(False)
-    parent_list = ObjectProperty()
+    time = StringProperty()
+    title = StringProperty()
+    location = StringProperty()
+    done = BooleanProperty(False)
 
-    def __init__(self, text='', completed=False, urgent=False, parent_list=None, **kwargs):
-        super().__init__(**kwargs)
-        self.text = text
-        self.completed = completed
-        self.urgent = urgent
-        self.parent_list = parent_list
+    def toggle_done(self, checkbox, value):
+        self.done = value
+        tasks = load_tasks()
+        for task in tasks:
+            if task['title'] == self.title and task['time'] == self.time:
+                task['done'] = value
+        save_tasks(tasks)
 
+class MainScreen(Screen):
+    def on_pre_enter(self):
+        self.update_tasks()
 
-class ToDoList(BoxLayout):
-    task_input = ObjectProperty(None)
-    task_list = ObjectProperty(None)
+    def update_tasks(self):
+        self.ids.tasks_box.clear_widgets()
+        tasks = load_tasks()
+        for task in tasks:
+            self.ids.tasks_box.add_widget(TaskItem(
+                time=task['time'],
+                title=task['title'],
+                location=task['location'],
+                done=task.get('done', False)
+            ))
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.tasks = []
-        self.load_tasks()
-        self.refresh_task_list()
+class AddTaskScreen(Screen):
+    def save_task(self):
+        title = self.ids.task_title.text
+        location = self.ids.task_location.text
+        time = self.ids.task_time.text
 
-    def add_task(self):
-        task_text = self.task_input.text.strip()
-        if task_text:
-            self.tasks.append({"text": task_text, "completed": False, "urgent": False})
-            self.task_input.text = ''
-            self.save_tasks()
-            self.refresh_task_list()
+        if not title or not time:
+            return
 
-    def toggle_complete(self, task_text):
-        for task in self.tasks:
-            if task["text"] == task_text:
-                task["completed"] = not task["completed"]
-                break
-        self.save_tasks()
-        self.refresh_task_list()
+        tasks = load_tasks()
+        tasks.append({
+            'title': title,
+            'location': location,
+            'time': time,
+            'done': False
+        })
+        save_tasks(tasks)
 
-    def toggle_urgent(self, task_text):
-        for task in self.tasks:
-            if task["text"] == task_text:
-                task["urgent"] = not task["urgent"]
-                break
-        self.save_tasks()
-        self.refresh_task_list()
+        self.manager.current = 'main'
 
-    def remove_task(self, task_text):
-        self.tasks = [task for task in self.tasks if task["text"] != task_text]
-        self.save_tasks()
-        self.refresh_task_list()
+        self.ids.task_title.text = ''
+        self.ids.task_location.text = ''
+        self.ids.task_time.text = ''
 
-    def save_tasks(self):
-        with open("tasks.json", "w") as f:
-            json.dump(self.tasks, f)
-
-    def load_tasks(self):
-        if os.path.exists("tasks.json"):
-            with open("tasks.json", "r") as f:
-                self.tasks = json.load(f)
-
-    def refresh_task_list(self):
-        self.task_list.clear_widgets()
-        for task in self.tasks:
-            task_item = TaskItem(text=task["text"], completed=task["completed"], urgent=task["urgent"],
-                                 parent_list=self)
-            self.task_list.add_widget(task_item)
-
-
-class ToDoApp(App):
+class TodoApp(App):
     def build(self):
-        return ToDoList()
+        sm = ScreenManager()
+        sm.add_widget(MainScreen(name='main'))
+        sm.add_widget(AddTaskScreen(name='add'))
+        return sm
 
-
-if __name__ == '__main__':
-    ToDoApp().run()
+if __name__ == "__main__":
+    TodoApp().run()

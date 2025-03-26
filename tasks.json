@@ -1,0 +1,32 @@
+[
+    {
+        "title": "Project daily stand-up",
+        "location": "At the conference center",
+        "time": "9:00 AM",
+        "done": true
+    },
+    {
+        "title": "Internia new UI style",
+        "location": "Bring presents",
+        "time": "11:00 AM",
+        "done": true
+    },
+    {
+        "title": "Weekly Review",
+        "location": "Wanda Square E5",
+        "time": "3:00 PM",
+        "done": true
+    },
+    {
+        "title": "Interview",
+        "location": "Bring laptop",
+        "time": "4:00 PM",
+        "done": true
+    },
+    {
+        "title": "Ahoj",
+        "location": "testos",
+        "time": "666:666 AM",
+        "done": true
+    }
+]

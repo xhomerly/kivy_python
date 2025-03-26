@@ -1,40 +1,92 @@
-<TodoList>:
-    orientation: 'vertical'
-    task_input: task_input
-    task_list: task_list
+<MainScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
 
-    TextInput:
-        id: task_input
-        hint_text: 'Zadej úkol'
-        size_hint_y: None
-        height: 40
-
-    Button:
-        text: 'Přidat úkol'
-        size_hint_y: None
-        height: 40
-        on_press: root.add_task()
-
-    ScrollView:
-        BoxLayout:
-            id: task_list
-            orientation: 'vertical'
+        Label:
+            text: "Today"
+            font_size: '24sp'
             size_hint_y: None
-            height: self.minimum_height
+            height: self.texture_size[1]
 
-<TaskItem>:
+        ScrollView:
+            GridLayout:
+                id: tasks_box
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+
+        Button:
+            text: "+ Add new task"
+            size_hint_y: None
+            height: dp(50)
+            on_release:
+                app.root.current = 'add'
+
+<AddTaskScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+
+        Label:
+            text: "What do you need to do?"
+            font_size: '20sp'
+
+        TextInput:
+            id: task_title
+            hint_text: "Task Title"
+            multiline: False
+
+        TextInput:
+            id: task_location
+            hint_text: "Location (optional)"
+            multiline: False
+
+        TextInput:
+            id: task_time
+            hint_text: "Time (e.g., 9:00 AM)"
+            multiline: False
+
+        Button:
+            text: "Save"
+            size_hint_y: None
+            height: dp(50)
+            on_release:
+                root.save_task()
+
+<TaskItem@BoxLayout>:
+    orientation: 'horizontal'
     size_hint_y: None
-    height: 40
+    height: dp(60)
+    spacing: dp(10)
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
 
-    Button:
-        text: root.text
-        on_press: root.parent_list.toggle_complete(root.text)
+    CheckBox:
+        active: root.done
+        on_active: root.toggle_done(self, self.active)
+        size_hint_x: None
+        width: dp(40)
 
-    ToggleButton:
-        text: 'urgent'
-        state: 'down' if root.urgent else 'normal'
-        on_press: root.parent_list.toggle_urgent(root.text)
+    Label:
+        text: root.title
+        bold: True
+        color: 0, 0, 0, 1
 
-    Button:
-        text: 'delete'
-        on_press: root.parent_list.remove_task(root.text)
+    Label:
+        text: root.location
+        italic: True
+        color: 0, 0, 0, 1
+
+    Label:
+        text: root.time
+        size_hint_x: 0.3
+        color: 0, 0, 0, 1
