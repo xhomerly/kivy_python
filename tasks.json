@@ -3,25 +3,25 @@
         "title": "Project daily stand-up",
         "location": "At the conference center",
         "time": "9:00 AM",
-        "done": true
+        "done": false
     },
     {
         "title": "Internia new UI style",
         "location": "Bring presents",
         "time": "11:00 AM",
-        "done": true
+        "done": false
     },
     {
         "title": "Weekly Review",
         "location": "Wanda Square E5",
         "time": "3:00 PM",
-        "done": true
+        "done": false
     },
     {
         "title": "Interview",
         "location": "Bring laptop",
         "time": "4:00 PM",
-        "done": true
+        "done": false
     },
     {
         "title": "Ahoj",
